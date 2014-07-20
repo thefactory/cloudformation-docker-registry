@@ -255,6 +255,7 @@ Resources:
           "EOF\n",
           "chmod +x /etc/sv/docker-registry/run\n",
           "ln -sf /etc/sv/docker-registry /etc/service/\n",
+          "sleep 5\n", # Give svscan time to notice the new service
           "sv restart docker-registry || error_exit 'Failed to launch Docker container'\n",
 
           "# Set up nginx proxy\n",
