@@ -248,6 +248,7 @@ Resources:
           "cat > /etc/sv/docker-registry/run <<EOF\n",
           "#!/bin/sh\n",
           "docker run",
+          " --rm",
           " -p 5000:5000",
           " -e AWS_BUCKET=", { Ref: S3Bucket },
           " -e SETTINGS_FLAVOR=prod",
