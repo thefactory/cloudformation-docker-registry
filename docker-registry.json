@@ -332,7 +332,7 @@
                 "mkdir -p /etc/sv/docker-registry\n",
                 "cat > /etc/sv/docker-registry/run <<EOF\n",
                 "#!/bin/sh\n",
-                "docker run",
+                "exec docker run",
                 " --rm",
                 " -p 5000:5000",
                 " -e AWS_BUCKET=",
