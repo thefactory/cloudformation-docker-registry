@@ -40,6 +40,12 @@ Parameters:
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instances
     Type: String
+  Ami:
+    # Ubuntu 14.04 amd64 hvm ebs-ssd images from
+    # http://cloud-images.ubuntu.com/releases/14.04/release-20140607.1/published-ec2-release.txt.orig
+    Description: "The EC2 AMI to use. See http://cloud-images.ubuntu.com/locator/ec2/"
+    Type: String
+    Default: ami-8827efe0
   DnsPrefix:
     Description: Prefix for the registry's DNS record (<prefix>.<zone>)
     Type: String
@@ -74,26 +80,6 @@ Parameters:
     Description: Existing security group that should be granted administrative access
       (e.g., 'sg-123456')
     Type: String
-Mappings:
-  RegionMap:
-    # Ubuntu 14.04 amd64 hvm ebs-ssd images from
-    # http://cloud-images.ubuntu.com/releases/14.04/release-20140607.1/published-ec2-release.txt.orig
-    ap-northeast-1:
-      AMI: ami-97fab396
-    ap-southeast-1:
-      AMI: ami-cae8b498
-    ap-southeast-2:
-      AMI: ami-d33e5ae9
-    eu-west-1:
-      AMI: ami-bd0cc5ca
-    sa-east-1:
-      AMI: ami-29d57a34
-    us-east-1:
-      AMI: ami-a6926dce
-    us-west-1:
-      AMI: ami-c6bdba83
-    us-west-2:
-      AMI: ami-b5a9d485
 
 Resources:
 
@@ -207,10 +193,7 @@ Resources:
       KeyName:
         Ref: KeyName
       ImageId:
-        Fn::FindInMap:
-        - RegionMap
-        - Ref: AWS::Region
-        - AMI
+        Ref: Ami
       SecurityGroups:
       - Ref: ServerSecurityGroup
       - Ref: AdminSecurityGroup
