@@ -211,9 +211,15 @@ Resources:
           "#!/bin/bash -ex\n",
 
           "apt-get update\n",
-          "apt-get install -y nginx python-setuptools runit\n",
+          "apt-get install -y nginx python-setuptools runit unattended-upgrades\n",
           "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
           "curl -s https://get.docker.io/ubuntu/ | sh\n",
+
+          "# Automatic security updates\n",
+          "cat > /etc/apt/apt.conf.d/20auto-upgrades <<EOF\n",
+          "APT::Periodic::Update-Package-Lists \"1\";\n",
+          "APT::Periodic::Unattended-Upgrade \"1\";\n",
+          "EOF\n",
 
           "# Helper function\n",
           "function error_exit\n",
