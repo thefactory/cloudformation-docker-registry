@@ -315,6 +315,7 @@
                 {
                   "Ref": "S3Bucket"
                 },
+                " -e STORAGE_REDIRECT=True",
                 " -e SETTINGS_FLAVOR=prod",
                 "  ",
                 {

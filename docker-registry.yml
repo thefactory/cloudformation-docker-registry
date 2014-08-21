@@ -240,6 +240,7 @@ Resources:
           " --rm",
           " -p 5000:5000",
           " -e AWS_BUCKET=", { Ref: S3Bucket },
+          " -e STORAGE_REDIRECT=True",
           " -e SETTINGS_FLAVOR=prod",
           "  ", { "Ref": "DockerImage" }, "\n",
           "EOF\n",
