@@ -62,7 +62,18 @@
     "HealthCheckGracePeriod": {
       "Description": "The length of time in seconds after a new EC2 instance comes into service that Auto Scaling starts checking its health.",
       "Type": "String",
-      "Default": "500"
+      "Default": "720"
+    },
+    "RedisMaxMemory": {
+      "Description": "The maximum amount of memory in bytes redis can use for its LRU cache.",
+      "Type": "String",
+      "Default": "2000000000"
+    },
+    "StorageRedirect": {
+      "Description": "This can take off the load from the server.",
+      "AllowedValues" : ["true", "false"],
+      "Type": "String",
+      "Default": "false"
     }
   },
 
@@ -179,14 +190,24 @@
                   "    secret_key: {{magic_string}}",
                   "    standalone: true",
                   "    disable_token_auth: true",
+                  "    storage_redirect: {{storage_redirect}}",
                   "    search_backend: sqlalchemy",
                   "    sqlalchemy_index_database: sqlite:////tmp/docker-registry.db",
+                  "    # Enabling LRU cache for small files",
+                  "    # This speeds up read/write on small files",
+                  "    # when using a remote storage backend (like S3).",
+                  "    cache_lru:",
+                  "        host: _env:REDIS_PORT_6379_TCP_ADDR",
+                  "        port: _env:REDIS_PORT_6379_TCP_PORT",
+                  "        db: _env:CACHE_LRU_REDIS_DB:0",
+                  "        password: _env:CACHE_LRU_REDIS_PASSWORD",
                   ""
                 ]]},
                 "context" : {
                   "access_key"  : { "Ref" : "HostKeys" },
                   "secret_key"  : { "Fn::GetAtt" : ["HostKeys", "SecretAccessKey"]},
                   "s3_bucket"   : { "Ref" : "S3Bucket"},
+                  "storage_redirect" : {"Ref": "StorageRedirect"},
                   "magic_string": "fL3YHeP1cmCHH5FWm1PKaO7cdo0VXkabAgiSEestXYZDgAiQcDCsTiWpOaukB1e9"
                 },
                 "mode"    : "000700",
@@ -264,9 +285,15 @@
           "ln -s /etc/nginx/sites-available/docker-registry /etc/nginx/sites-enabled/docker-registry\n",
           "service nginx restart\n",
 
+          "# Set up redis cache\n",
+          "mkdir /data\n",
+          "chmod 777 /data\n",
+          "docker run -v /data:/data --name redis-cache -d redis redis-server --appendonly yes --maxmemory ", { "Ref": "RedisMaxMemory" }, " --maxmemory-policy allkeys-lru\n",
+
           "# Set up docker registry\n",
           "docker pull ", { "Ref": "DockerImage" }, "\n",
           "runit-service create docker-registry docker run",
+          "   --link redis-cache:redis",
           "   -p 5000:5000",
           "   -v /opt/docker-registry:/registry-conf",
           "   -e DOCKER_REGISTRY_CONFIG=/registry-conf/config.yaml",
